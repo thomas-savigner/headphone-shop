@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import Image from 'next/image';
 
 
-
+// Fonction pour récupérer les casques avec leurs statistiques d’avis
 async function getheadphonesWithStats() {
   // 1) on récupère tous les produits + les ratings associés
   const { data, error } = await supabase
