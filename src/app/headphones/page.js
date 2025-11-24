@@ -1,7 +1,6 @@
-// app/casques/page.jsx
+// app/casques/page.js
 import { supabase } from '@/lib/supabaseClient';
-import Image from 'next/image';
-import Link from 'next/link';
+import HeadphonesList from '@/components/HeadphonesList';
 
 // Fonction pour récupérer les casques avec leurs statistiques d’avis
 async function getheadphonesWithStats() {
@@ -17,6 +16,7 @@ async function getheadphonesWithStats() {
       image_path,
       image_alt,
       short_description,
+      type,
       reviews:reviews (rating)
     `)
     .order('price_eur', { ascending: true });
@@ -70,68 +70,7 @@ export default async function Heaphones() {
             Next.js.
           </p>
         </header>
-
-        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {headphones.map((headphone) => (
-            <Link
-              href={`/headphones/${headphone.id}`}
-              key={headphone.id}
-              className="border border-slate-800 rounded-xl p-4 bg-slate-900/60 flex flex-col"
-            >
-              {headphone.imageUrl && (
-                <div className="mb-4 aspect-4/3 overflow-hidden rounded-lg bg-slate-800 flex items-center justify-center">
-                  <Image
-                    src={headphone.imageUrl}
-                    alt={headphone.image_alt}
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              )}
-
-              <div className="flex-1 flex flex-col">
-                <div className="text-xs uppercase tracking-wide text-sky-400 mb-1">
-                  {headphone.range}
-                </div>
-
-                <h2 className="text-lg font-semibold mb-1">
-                  {headphone.name}
-                </h2>
-
-                <p className="text-sm text-slate-300 mb-3">
-                  {headphone.short_description}
-                </p>
-
-                <div className="flex items-center justify-between mb-3 text-sm">
-                  <span className="font-semibold text-sky-300">
-                    {headphone.price_eur} €
-                  </span>
-
-                  <div className="text-xs text-slate-300 flex items-center gap-2">
-                    {headphone.avgRating ? (
-                      <>
-                        <span>
-                          ⭐ {headphone.avgRating.toFixed(1)} / 5
-                        </span>
-                        <span className="text-slate-500">
-                          ({headphone.reviewsCount} avis)
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-slate-500">Aucun avis</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-auto flex items-center justify-between text-xs text-slate-500">
-                  <span>SKU : {headphone.sku}</span>
-                  <span>ID : {headphone.id}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </section>
+        <HeadphonesList initialProducts={headphones} />
       </div>
     </main>
   );
