@@ -1,4 +1,4 @@
-// app/headphones/[id]/page.jsx
+// app/headphones/[id]/page.js
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -45,6 +45,7 @@ async function getProductWithReviews(id) {
     return null;
   }
 
+  // Calcul de la moyenne des avis et du nombre d’avis
   const ratings = data.reviews?.map((r) => r.rating) ?? [];
   const reviewsCount = ratings.length;
   const avgRating =
@@ -54,6 +55,7 @@ async function getProductWithReviews(id) {
       ) / 10
       : null;
 
+  // URL publique de l’image (bucket "images")
   const rawImagePath = data.image_path ?? '';
   const cleanPath = rawImagePath.startsWith('images/')
     ? rawImagePath.replace(/^images\//, '')
@@ -64,6 +66,7 @@ async function getProductWithReviews(id) {
     .getPublicUrl(cleanPath);
 
   return {
+    // Données du produit avec URL de l’image publique et statistiques des avis
     ...data,
     imageUrl: imageData?.publicUrl || null,
     reviewsCount,
@@ -75,6 +78,7 @@ export default async function CasqueDetailPage({ params }) {
   const { id } = await params;
   const product = await getProductWithReviews(id);
 
+  // Gestion du cas où le produit n’est pas trouvé
   if (!product) {
     return (
       <main className="min-h-screen bg-slate-950 text-slate-50 px-6 py-10">
