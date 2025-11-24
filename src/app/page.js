@@ -18,7 +18,7 @@ export default function HomePage() {
         </header>
         <section>
           <Link
-            href="/catalog"
+            href="/headphones"
             className="text-sky-400 underline hover:text-sky-500"
           >
             Voir le catalogue des casques

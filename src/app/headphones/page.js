@@ -1,7 +1,7 @@
 // app/casques/page.jsx
 import { supabase } from '@/lib/supabaseClient';
 import Image from 'next/image';
-
+import Link from 'next/link';
 
 // Fonction pour récupérer les casques avec leurs statistiques d’avis
 async function getheadphonesWithStats() {
@@ -55,7 +55,7 @@ async function getheadphonesWithStats() {
 
 
 
-export default async function CasquesPage() {
+export default async function Heaphones() {
   const headphones = await getheadphonesWithStats();
 
   return (
@@ -73,7 +73,8 @@ export default async function CasquesPage() {
 
         <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {headphones.map((headphone) => (
-            <article
+            <Link
+              href={`/headphones/${headphone.id}`}
               key={headphone.id}
               className="border border-slate-800 rounded-xl p-4 bg-slate-900/60 flex flex-col"
             >
@@ -128,7 +129,7 @@ export default async function CasquesPage() {
                   <span>ID : {headphone.id}</span>
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </section>
       </div>
