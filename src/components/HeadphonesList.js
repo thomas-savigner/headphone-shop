@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { getParam, setParam, replaceParam } from '@/lib/urlParams';
 
-export default function HeadphonesList({ initialProducts }) {
+export default function HeadphonesList({ headphones }) {
+    const safeHeadphones = useMemo(() => headphones ?? [], [headphones]);
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -20,36 +21,45 @@ export default function HeadphonesList({ initialProducts }) {
     const search = getParam(searchParams, 'q', '');
     const sortBy = getParam(searchParams, 'sort', 'price-asc');
 
+    // --- Options de filtres dynamiques (depuis les données) ---
+    const ranges = useMemo(
+        () => ['all', ...Array.from(new Set(safeHeadphones.map((h) => h.range)))],
+        [safeHeadphones]
+    );
+
+    const types = useMemo(
+        () => ['all', ...Array.from(new Set(safeHeadphones.map((h) => h.type)))],
+        [safeHeadphones]
+    );
+
     // --- Helpers pour mettre à jour l'URL ---
+    const updateFilter = (key, value, defaultValue) => {
+        const newParams = setParam(searchParams, key, value, defaultValue);
+        replaceParam(router, pathname, newParams);
+    };
 
     const handleRangeChange = (value) => {
-        const newParams = setParam(searchParams, 'range', value, 'all');
-        replaceParam(router, pathname, newParams);
+        updateFilter('range', value, 'all');
     };
 
     const handleTypeChange = (value) => {
-        const newParams = setParam(searchParams, 'type', value, 'all');
-        replaceParam(router, pathname, newParams);
+        updateFilter('type', value, 'all');
     };
 
     const handleMinPriceChange = (value) => {
-        const newParams = setParam(searchParams, 'min', value, '');
-        replaceParam(router, pathname, newParams);
+        updateFilter('min', value, '');
     };
 
     const handleMaxPriceChange = (value) => {
-        const newParams = setParam(searchParams, 'max', value, '');
-        replaceParam(router, pathname, newParams);
+        updateFilter('max', value, '');
     };
 
     const handleSearchChange = (value) => {
-        const newParams = setParam(searchParams, 'q', value, '');
-        replaceParam(router, pathname, newParams);
+        updateFilter('q', value, '');
     };
 
     const handleSortChange = (value) => {
-        const newParams = setParam(searchParams, 'sort', value, 'price-asc');
-        replaceParam(router, pathname, newParams);
+        updateFilter('sort', value, 'price-asc');
     };
 
     const handleResetFilters = () => {
@@ -62,69 +72,6 @@ export default function HeadphonesList({ initialProducts }) {
 
         replaceParam(router, pathname, params);
     };
-
-    // --- Options de filtres (gammes / types) ---
-
-    const ranges = useMemo(
-        () => ['all', ...Array.from(new Set(initialProducts.map(p => p.range)))],
-        [initialProducts]
-    );
-
-    const types = useMemo(
-        () => ['all', ...Array.from(new Set(initialProducts.map(p => p.type)))],
-        [initialProducts]
-    );
-
-    // --- Application des filtres en mémoire ---
-
-    const filteredProducts = useMemo(() => {
-        let result = [...initialProducts];
-
-        // Filtre gamme
-        if (rangeFilter !== 'all') {
-            result = result.filter(p => p.range === rangeFilter);
-        }
-
-        // Filtre type
-        if (typeFilter !== 'all') {
-            result = result.filter(p => p.type === typeFilter);
-        }
-
-        // Prix min / max
-        const min = minPrice !== '' ? Number(minPrice) : null;
-        if (min !== null && !Number.isNaN(min)) {
-            result = result.filter(p => p.price_eur >= min);
-        }
-
-        const max = maxPrice !== '' ? Number(maxPrice) : null;
-        if (max !== null && !Number.isNaN(max)) {
-            result = result.filter(p => p.price_eur <= max);
-        }
-
-        // Recherche texte (nom / description courte / gamme)
-        if (search.trim() !== '') {
-            const q = search.toLowerCase();
-            result = result.filter(p =>
-            (p.name?.toLowerCase().includes(q) ||
-                p.short_description?.toLowerCase().includes(q) ||
-                p.range?.toLowerCase().includes(q))
-            );
-        }
-
-        // Tri
-        result.sort((a, b) => {
-            if (sortBy === 'price-asc') return a.price_eur - b.price_eur;
-            if (sortBy === 'price-desc') return b.price_eur - a.price_eur;
-            if (sortBy === 'rating-desc') {
-                const ar = a.avgRating ?? 0;
-                const br = b.avgRating ?? 0;
-                return br - ar;
-            }
-            return 0;
-        });
-
-        return result;
-    }, [initialProducts, rangeFilter, typeFilter, minPrice, maxPrice, search, sortBy]);
 
     return (
         <div className="space-y-6">
@@ -225,11 +172,11 @@ export default function HeadphonesList({ initialProducts }) {
             {/* Résultats */}
             <section>
                 <p className="text-xs text-slate-400 mb-2">
-                    {filteredProducts.length} casque(s) trouvé(s)
+                    {safeHeadphones.length} casque(s) trouvé(s)
                 </p>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredProducts.map((product) => (
+                    {safeHeadphones.map((product) => (
                         <Link
                             key={product.id}
                             href={`/headphones/${product.id}`}
