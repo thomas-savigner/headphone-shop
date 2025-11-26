@@ -1,4 +1,4 @@
-// app/casques/CasquesList.jsx
+// app/casques/HeadphonesList.jsx
 'use client';
 
 import { useMemo } from 'react';
